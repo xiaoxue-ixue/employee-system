@@ -50,3 +50,5 @@ logs/
 .env
 *.local.yml
 application-prod.yml
+
+.idea/
