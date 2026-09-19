@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+    <properties resource="jdbc.properties"/>
+
+    <settings>
+        <!-- ★ 关键：数据库 create_time 自动映射到 Java 的 createTime -->
+        <setting name="mapUnderscoreToCamelCase" value="true"/>
+        <!-- ★ 初学必备：控制台直接打印执行的 SQL -->
+        <setting name="logImpl" value="STDOUT_LOGGING"/>
+    </settings>
+
+    <typeAliases>
+        <!-- 之后 XML 里可以直接写 resultType="Dept" -->
+        <package name="com.xiaoxue.employee.entity"/>
+    </typeAliases>
+
+    <environments default="development">
+        <environment id="development">
+            <transactionManager type="JDBC"/>
+            <dataSource type="POOLED">
+                <property name="driver" value="${jdbc.driver}"/>
+                <property name="url" value="${jdbc.url}"/>
+                <property name="username" value="${jdbc.username}"/>
+                <property name="password" value="${jdbc.password}"/>
+            </dataSource>
+        </environment>
+    </environments>
+
+    <mappers>
+        <!-- 明晚建好 DeptMapper.xml 后再放开这一行 -->
+        <!-- <mapper resource="mapper/DeptMapper.xml"/> -->
+    </mappers>
+</configuration>
