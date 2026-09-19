@@ -52,3 +52,4 @@ logs/
 application-prod.yml
 
 .idea/
+src/main/resources/jdbc.properties
