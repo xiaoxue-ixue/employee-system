@@ -39,10 +39,13 @@ employee-system/
 ├── sql/
 │   ├── schema.sql         # 建表脚本
 │   └── data.sql           # 测试数据
-├── backend-mybatis/       # 阶段一：纯 Maven + MyBatis（理解持久层原理）
-├── backend/               # 阶段二：SpringBoot 正式后端
-└── frontend/              # 阶段三：Vue3 极简页面
+├── src/main/java/com/xiaoxue/employee/    # 后端源码（当前仅 IDEA 生成的 Main.java 脚手架）
+└── pom.xml                # Maven 配置（依赖待补齐）
 ```
+
+> 说明：文档早期规划过 `backend-mybatis/`、`backend/`、`frontend/` 三个独立模块，
+> 实际采用**单模块扁平结构**，各阶段在原项目内逐步演进（M2 纯 MyBatis → M3 原地升级 SpringBoot），
+> 避免中途搬迁目录、破坏 Git 历史。
 
 ---
 
@@ -51,7 +54,7 @@ employee-system/
 | 里程碑 | 内容 | 状态 |
 |---|---|---|
 | M1 | 需求分析 + 数据库设计（三表 + 索引 + 外键约束验证） | ✅ 已完成（2026-09-13） |
-| M2 | 纯 MyBatis 实现部门/员工 CRUD | ⏳ 进行中 |
+| M2 | 纯 MyBatis 实现部门/员工 CRUD | ⏳ 待开始 |
 | M3 | 迁移 SpringBoot，提供 REST 接口 + 分页 + 统一响应 | ⏳ 待开始 |
 | M4 | 登录认证（令牌 + 拦截器）+ AOP 操作日志 + 文件上传 | ⏳ 待开始 |
 | M5 | 极简前端联调 + 部署 + README 完善 | ⏳ 待开始 |
