@@ -30,7 +30,6 @@
     </environments>
 
     <mappers>
-        <!-- 明晚建好 DeptMapper.xml 后再放开这一行 -->
-        <!-- <mapper resource="mapper/DeptMapper.xml"/> -->
+        <mapper resource="mapper/DeptMapper.xml"/>
     </mappers>
 </configuration>

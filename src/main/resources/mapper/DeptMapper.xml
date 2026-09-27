@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xiaoxue.employee.mapper.DeptMapper">
+
+    <select id="selectAll" resultType="Dept">
+        SELECT id, name, create_time, update_time FROM dept
+    </select>
+
+    <select id="selectById" resultType="Dept">
+        SELECT id, name, create_time, update_time
+        FROM dept
+        WHERE id = #{id}
+    </select>
+
+    <insert id="insert" parameterType="Dept" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO dept (name) VALUES (#{name})
+    </insert>
+
+    <update id="update" parameterType="Dept">
+        UPDATE dept SET name = #{name} WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM dept WHERE id = #{id}
+    </delete>
+
+</mapper>

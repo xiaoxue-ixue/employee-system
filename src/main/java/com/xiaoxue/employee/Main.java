@@ -1,17 +1,55 @@
 package com.xiaoxue.employee;
 
-//TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
-public class Main {
-    public static void main(String[] args) {
-        //TIP Press <shortcut actionId="ShowIntentionActions"/> with your caret at the highlighted text
-        // to see how IntelliJ IDEA suggests fixing it.
-        System.out.printf("Hello and welcome!");
+import com.xiaoxue.employee.entity.Dept;
+import com.xiaoxue.employee.mapper.DeptMapper;
+import org.apache.ibatis.io.Resources;
+import org.apache.ibatis.session.SqlSession;
+import org.apache.ibatis.session.SqlSessionFactory;
+import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 
-        for (int i = 1; i <= 5; i++) {
-            //TIP Press <shortcut actionId="Debug"/> to start debugging your code. We have set one <icon src="AllIcons.Debugger.Db_set_breakpoint"/> breakpoint
-            // for you, but you can always add more by pressing <shortcut actionId="ToggleLineBreakpoint"/>.
-            System.out.println("i = " + i);
+import java.io.IOException;
+import java.io.InputStream;
+
+public class Main {
+    public static void main(String[] args) throws IOException {
+
+        try (InputStream in = Resources.getResourceAsStream("mybatis-config.xml")) {
+            SqlSessionFactory factory = new SqlSessionFactoryBuilder().build(in);
+
+            try (SqlSession session = factory.openSession()) {
+                DeptMapper deptMapper = session.getMapper(DeptMapper.class);
+
+                // 1) 初始条数
+                System.out.println("1) 初始部门数 = " + deptMapper.selectAll().size());
+
+                // 2) 新增「财务部」
+                Dept add = new Dept();
+                add.setName("财务部");
+                int insertRows = deptMapper.insert(add);
+                System.out.println("2) insert 受影响行数 = " + insertRows
+                        + "，回填的自增 id = " + add.getId());
+                session.commit();   // ★ 不 commit，数据不会真正入库
+
+                // 3) 应该是 4 条
+                System.out.println("3) 新增后部门数 = " + deptMapper.selectAll().size());
+
+                // 4) 改名（复用 add 对象，它的 id 已被回填）
+                add.setName("财务部-测试");
+                int updateRows = deptMapper.update(add);
+                System.out.println("4) update 受影响行数 = " + updateRows);
+                session.commit();
+
+                // 5) 按 id 回查，验证改名真的生效
+                System.out.println("5) 按 id 回查 = " + deptMapper.selectById(add.getId()));
+
+                // 6) 删除
+                int deleteRows = deptMapper.deleteById(add.getId());
+                System.out.println("6) delete 受影响行数 = " + deleteRows);
+                session.commit();
+
+                // 7) 回到 3 条
+                System.out.println("7) 删除后部门数 = " + deptMapper.selectAll().size());
+            }
         }
     }
 }
