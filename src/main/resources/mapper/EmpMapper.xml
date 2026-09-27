@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xiaoxue.employee.mapper.EmpMapper">
+
+    <!-- ============================================================
+         改动 ①：抽取 SQL 片段
+         原先 9 个列名在 3 条 select 里各写了一遍（共 27 行列名）。
+         抽到这里只维护一份，以后表加字段/改字段名只改这一处，不会漏改。
+         用 <include refid="baseColumns"/> 引入。
+         ============================================================ -->
+    <sql id="baseColumns">
+        id, username, name, dept_id, image, job, entry_date, create_time, update_time
+    </sql>
+
+    <select id="selectAll" resultType="Emp">
+        SELECT <include refid="baseColumns"/> FROM emp
+        ORDER BY id
+    </select>
+
+    <select id="selectById" resultType="Emp">
+        SELECT <include refid="baseColumns"/> FROM emp
+        WHERE id = #{id}
+    </select>
+
+    <select id="selectByCondition" resultType="Emp">
+        SELECT <include refid="baseColumns"/> FROM emp
+        <where>
+            <!-- <where> 的两个作用：
+                 1) 所有 <if> 都不成立时，连 WHERE 关键字都不生成
+                    （否则会拼出 "... FROM emp WHERE" 这种语法错误）
+                 2) 第一个成立的条件，开头的 AND 会被自动删掉
+                    （否则会拼出 "WHERE AND name LIKE ..."） -->
+
+            <!-- 模糊查询仍走 #{} 预编译，防 SQL 注入；'%' 由 SQL 的 CONCAT 拼 -->
+            <if test="name != null and name != ''">
+                AND name LIKE CONCAT('%', #{name}, '%')
+            </if>
+
+            <!-- test 里用的是【Java 属性名】deptId（驼峰），不是列名 -->
+            <if test="deptId != null">
+                AND dept_id = #{deptId}
+            </if>
+
+            <!-- 改动 ②：>= / <= 必须写成 &gt;= / &lt;=
+                 XML 里 "<" 是标签开始符，直接写 "<=" 会被当成新标签的开始，解析直接报错。
+                 ">" 理论上可以不转义，但两个都转义更省心。 -->
+            <if test="entryDateBegin != null">
+                AND entry_date &gt;= #{entryDateBegin}
+            </if>
+            <if test="entryDateEnd != null">
+                AND entry_date &lt;= #{entryDateEnd}
+            </if>
+        </where>
+        ORDER BY id
+    </select>
+
+    <!-- insert 只插 6 个业务字段：
+         - id                          自增，数据库生成；靠 useGeneratedKeys + keyProperty
+                                       回填到 emp.getId()
+         - create_time / update_time   数据库有 DEFAULT CURRENT_TIMESTAMP，自动填 -->
+    <insert id="insert" parameterType="Emp" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO emp (username, name, dept_id, image, job, entry_date)
+        VALUES (#{username}, #{name}, #{deptId}, #{image}, #{job}, #{entryDate})
+    </insert>
+
+    <!-- ============================================================
+         改动 ③：修复 update 的严重 bug
+         原先 4 行都误写成 "name = #{xxx}"，会导致：
+             调用 update 想改「职位」→ 实际把「姓名」覆盖成了职位
+         另外第 4 行 test 写的是列名 dept_id，但 test 里必须是 Java 属性名。
+
+         ★ 一条规则记牢：
+             <if test=""> 里面 → 写【Java 属性名】（驼峰 deptId）
+             SET 左边          → 写【数据库列名】（下划线 dept_id）
+           原因：test 是拿给 OGNL 在 Emp 对象上找属性的，Emp 上只有 deptId，
+                写成 dept_id 找不到会直接抛异常；
+                而 SET 左边是原样拼进 SQL 的，必须符合数据库列名。
+         ============================================================ -->
+    <update id="update" parameterType="Emp">
+        UPDATE emp
+        <set>
+            <!-- <set> 会自动去掉最后一个多余的逗号，
+                 所以每行结尾都写 "," 是正确的，不用自己判断哪行是最后一个 -->
+            <if test="username != null">username = #{username},</if>
+            <if test="name != null">name = #{name},</if>
+            <if test="deptId != null">dept_id = #{deptId},</if>
+            <if test="image != null">image = #{image},</if>
+            <if test="job != null">job = #{job},</if>
+            <if test="entryDate != null">entry_date = #{entryDate},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <!-- WHERE id = #{id} 是保命条件，漏掉就是删全表 -->
+    <delete id="deleteById">
+        DELETE FROM emp
+        WHERE id = #{id}
+    </delete>
+
+</mapper>

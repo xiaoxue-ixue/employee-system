@@ -28,8 +28,9 @@
             </dataSource>
         </environment>
     </environments>
-
     <mappers>
         <mapper resource="mapper/DeptMapper.xml"/>
+        <mapper resource="mapper/EmpMapper.xml"/>
     </mappers>
+
 </configuration>
