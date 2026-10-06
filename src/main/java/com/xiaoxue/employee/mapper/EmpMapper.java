@@ -18,6 +18,18 @@ public interface EmpMapper {
                                 @Param("entryDateBegin") LocalDate begin,
                                 @Param("entryDateEnd") LocalDate end);
 
+    long countByCondition(@Param("name") String name,
+                          @Param("deptId") Long deptId,
+                          @Param("entryDateBegin") LocalDate begin,
+                          @Param("entryDateEnd") LocalDate end);
+
+    List<Emp> selectByConditionWithPage(@Param("name") String name,
+                                        @Param("deptId") Long deptId,
+                                        @Param("entryDateBegin") LocalDate begin,
+                                        @Param("entryDateEnd") LocalDate end,
+                                        @Param("offset") int offset,
+                                        @Param("pageSize") int pageSize);
+
     int insert(Emp emp);
 
     int update(Emp emp);

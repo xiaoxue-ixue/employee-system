@@ -13,6 +13,20 @@
         id, username, name, dept_id, image, job, entry_date, create_time, update_time
     </sql>
 
+    <!-- ★ 改动 ④：WHERE 条件也只写一份，count 和分页查询共用
+         片段里的 #{name} / #{deptId} ... 由 @Param 传进来，include 的地方不用再传参。
+         ⚠ 注意：selectByCondition 底下还留着自己的一份 <where>（那里有学习笔记），
+           所以同样的 4 个条件现在存在两处 —— 以后要加/改查询条件，两边都得改，
+           否则会漂移（这也是为什么更彻底的写法是让 selectByCondition 也 include 这里）。 -->
+    <sql id="queryWhere">
+        <where>
+            <if test="name != null and name != ''">AND name LIKE CONCAT('%', #{name}, '%')</if>
+            <if test="deptId != null">AND dept_id = #{deptId}</if>
+            <if test="entryDateBegin != null">AND entry_date &gt;= #{entryDateBegin}</if>
+            <if test="entryDateEnd != null">AND entry_date &lt;= #{entryDateEnd}</if>
+        </where>
+    </sql>
+
     <select id="selectAll" resultType="Emp">
         SELECT <include refid="baseColumns"/> FROM emp
         ORDER BY id
@@ -21,6 +35,17 @@
     <select id="selectById" resultType="Emp">
         SELECT <include refid="baseColumns"/> FROM emp
         WHERE id = #{id}
+    </select>
+
+    <select id="countByCondition" resultType="long">
+        SELECT COUNT(*) FROM emp <include refid="queryWhere"/>
+    </select>
+
+    <select id="selectByConditionWithPage" resultType="Emp">
+        SELECT <include refid="baseColumns"/> FROM emp
+        <include refid="queryWhere"/>
+        ORDER BY id
+        LIMIT #{offset}, #{pageSize}
     </select>
 
     <select id="selectByCondition" resultType="Emp">
