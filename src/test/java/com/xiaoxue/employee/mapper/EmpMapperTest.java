@@ -63,9 +63,16 @@ public class EmpMapperTest {
 
     @After
     public void tearDown() {
-        // 只读测试时这行是空操作；写测试时它就是「不留痕迹」的保证
-        session.rollback();
-        session.close();
+        try {
+            // 只读测试时这行是空操作；写测试时它就是「不留痕迹」的保证
+            session.rollback();
+        } finally {
+            // ★ 必须放 finally：如果 rollback() 自己抛了异常，close() 就被跳过了，
+            //   连接不会还给连接池 → 就是这个测试类 15 个用例 = 15 条泄漏的连接，
+            //   池子占满之后后面的测试全是 "Pooled connection has already been closed"。
+            //   资源的释放永远放 finally，和业务是否成功无关。
+            session.close();
+        }
     }
 
     // ==================== 一、查询 ====================
